@@ -1,0 +1,25 @@
+{
+  "name": "event-tracker",
+  "version": "1.0.0",
+  "description": "send events to the /events endpoint easily",
+  "main": "index.js",
+  "scripts": {
+    "test": "./node_modules/mocha/bin/mocha --recursive ./test/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/reddit/event-tracker.git"
+  },
+  "author": "Jack Lawson <jack@reddit.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/reddit/event-tracker/issues"
+  },
+  "homepage": "https://github.com/reddit/event-tracker#readme",
+  "dependencies": {
+    "chai": "^3.3.0",
+    "mocha": "^2.3.3",
+    "sinon": "^1.17.1",
+    "sinon-chai": "^2.8.0"
+  }
+}
