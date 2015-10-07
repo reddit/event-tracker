@@ -113,4 +113,4 @@
   } else {
     global.EventTracker = EventTracker;
   }
-}(global || window);
+}(this);
