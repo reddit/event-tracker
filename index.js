@@ -1,14 +1,16 @@
 !function(global) {
   'use strict';
 
-  function uuid() {
-    function s4() {
-      return Math.floor((1 + Math.random()) * 0x10000)
-      .toString(16)
-      .substring(1);
-    }
-    return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
-      s4() + '-' + s4() + s4() + s4();
+  var now = global.performance ? performance.now || Date.getTime;
+
+  function generateUUID(){
+    var d = now();
+    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      var r = (d + Math.random()*16)%16 | 0;
+      d = Math.floor(d/16);
+      return (c=='x' ? r : (r&0x3|0x8)).toString(16);
+    });
+    return uuid;
   }
 
   function EventTracker(key, post, url, clientName, config) {
