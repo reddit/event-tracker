@@ -1,7 +1,7 @@
 !function(global) {
   'use strict';
 
-  var now = global.performance ? performance.now || Date.getTime;
+  var now = global.performance ? performance.now : Date.getTime;
 
   function generateUUID(){
     var d = now();
@@ -102,10 +102,11 @@
     }, this.bufferTimeout);
   }
 
-  EventTracker.prototype.buildClientContext = function buildClientContext () {
+  EventTracker.prototype._buildClientContext = function buildClientContext () {
     return {
       user_agent: navigator.userAgent,
       domain: document.location.host,
+      path: document.location.pathname + document.location.search,
     }
   }
 

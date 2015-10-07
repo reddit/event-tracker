@@ -13,7 +13,7 @@ var tracker = new EventTracker(
   'https://events-test.redditmedia.com/v1', // collector endpoint
   'desktopWeb', // client name, prepended to event type in payload
   {
-    appendClientContext: true, // automatically adds user_agent and domain to payload
+    appendClientContext: true, // automatically adds user_agent, path, and domain to payload
     bufferTimeout: 100, // flush buffer of events after 100ms
     bufferLength: 40, // flush buffer events after buffer length is 40
   }
