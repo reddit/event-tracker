@@ -39,3 +39,13 @@ tracker.send();
 See [this wiki page](https://reddit.atlassian.net/wiki/pages/viewpage.action?pageId=19267594)
 for some examples of payload data. `user_agent` and `domain` are automatically
 added to payload data if `appendClientContext` is true.
+
+## Testing
+
+* Install node
+* Run `npm test`
+
+## Using It
+
+* Either use it as a git-linked NPM package, copypaste it into your project, or
+  git-submodule it.
