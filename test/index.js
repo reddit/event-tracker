@@ -80,6 +80,7 @@ describe('EventTracker', function() {
 
       expect(args.uuid).to.not.be.undefined;
       expect(args.event_ts).to.not.be.undefined;
+      expect(args.utc_offset).to.not.be.undefined;
       stub.restore();
     });
 

@@ -71,11 +71,13 @@
 
   EventTracker.prototype._buildData = function buildData (topic, type, payload) {
     var clientName = this.clientName;
+    var now = new Date();
 
     var data = {
       event_topic: topic,
       event_type: clientName + '.' + type,
-      event_ts: (new Date()).getTime() / 1000,
+      event_ts: now.getTime() / 1000,
+      utc_offset: now.getTimezoneOffset(),
       uuid: payload.uuid || uuid(),
       payload: payload,
     };
