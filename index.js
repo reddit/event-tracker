@@ -5,6 +5,7 @@
     return global.performance ? global.performance.now() : (new Date()).getTime();
   }
 
+  // Pulled from elsewhere
   function uuid(){
     var d = now();
 
@@ -17,6 +18,21 @@
     return id;
   }
 
+  /*
+   * Create a new event tracker.
+   *
+   * key: the secret key you must have to send events, like 'ab42sdfsafsc'
+   * post: a function with the args (url, data). The body should send the data.
+   *   you'll probably do something like pass in `jQuery.post`, or a superagent
+   *   wrapper.
+   * url: the url of the events endpoint, like 'https://stats.redditmedia.com/events'
+   * clientName: the name of your client, like 'mweb'
+   * config: an object containing optional configuration, such as:
+   *   bufferTimeout: an integer, after which ms, the buffer of events is sent
+   *     to the `post` function;
+   *   bufferLength: an integer, after which the buffer contains this many
+   *     items, the buffer of events is sent to the `post` function;
+   */
   function EventTracker(key, post, url, clientName, config) {
     config = config || {};
 
@@ -54,21 +70,33 @@
     this.buffer = [];
   }
 
-  // Send an event topic (such as `mod_events`), a type (such as `ban`), and
-  // an optional data payload.
+  /*
+   * Add an event to the buffer.
+   *
+   * topic: an event topic (such as `mod_events`)
+   * type: an event type for your topic (such as `ban)
+   * data payload: extra data, send whatever your heart desires
+   */
   EventTracker.prototype.track = function trackEvent (topic, type, payload) {
     var data = this._buildData(topic, type, payload || {});
     this._buffer(data);
   };
 
+  /*
+   * Immediately flush the buffer. Called internally as well during buffer
+   * timeout.
+   */
   EventTracker.prototype.send = function send() {
     if (this.buffer.length) {
-      this.post(this.buffer);
+      this.post(this.url, this.buffer);
       this.buffer = [];
       this._resetTimer();
     }
   };
 
+  /*
+   * Internal. Formats a payload to be sent to the event tracker.
+   */
   EventTracker.prototype._buildData = function buildData (topic, type, payload) {
     var clientName = this.clientName;
     var now = new Date();
@@ -92,6 +120,9 @@
     return data;
   };
 
+  /*
+   * Internal. Adds events to the buffer, and flushes if necessary.
+   */
   EventTracker.prototype._buffer = function buffer(data) {
     this.buffer.push(data);
 
@@ -102,6 +133,9 @@
     }
   }
 
+  /*
+   * Internal. Resets the buffer timeout.
+   */
   EventTracker.prototype._resetTimer = function resetTimer() {
     if (this.timer) {
       clearTimeout(this.timer);
@@ -113,6 +147,10 @@
     }, this.bufferTimeout);
   }
 
+  /*
+   * Internal. Adds certain browser-based properties to the payload if
+   * configured to do so.
+   */
   EventTracker.prototype._buildClientContext = function buildClientContext () {
     return {
       user_agent: navigator.userAgent,
