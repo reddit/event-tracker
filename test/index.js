@@ -17,6 +17,10 @@ global.document = {
 
 var EventTracker = require('../index.js');
 
+function calculateHash (key, string) {
+  return key;
+}
+
 describe('EventTracker', function() {
   describe('constructor', function() {
     it('exists', function() {
@@ -41,6 +45,10 @@ describe('EventTracker', function() {
       }).to.throw(/missing clientName/i);
 
       expect(function() {
+        new EventTracker('key', function(){}, 'url', 'clientName')
+      }).to.throw(/missing calculateHash/i);
+
+      expect(function() {
         new EventTracker('key', function(){}, 'url', 'clientName', { })
       }).to.not.throw();
     });
@@ -55,7 +63,7 @@ describe('EventTracker', function() {
       var timeout = 10;
       var length = 5;
 
-      var tracker = new EventTracker('key', function(){}, 'url', 'clientName', {
+      var tracker = new EventTracker('key', function(){}, 'url', 'clientName', calculateHash, {
         bufferTimeout: timeout,
         bufferLength: length
       });
@@ -67,7 +75,7 @@ describe('EventTracker', function() {
 
   describe('tracking', function() {
     it('adds guid and timestamp to the data', function() {
-      var tracker = new EventTracker('key', function(){}, 'url', 'clientName', {
+      var tracker = new EventTracker('key', function(){}, 'url', 'clientName', calculateHash, {
         bufferTimeout: 0
       });
 
@@ -89,7 +97,7 @@ describe('EventTracker', function() {
       var type = 'type';
       var clientName = 'clientName';
 
-      var tracker = new EventTracker('key', function(){}, 'url', clientName, {
+      var tracker = new EventTracker('key', function(){}, 'url', clientName, calculateHash, {
         bufferTimeout: 0
       });
 
@@ -105,7 +113,7 @@ describe('EventTracker', function() {
     });
 
     it('appends client context if configured as true', function() {
-      var tracker = new EventTracker('key', function(){}, 'url', 'clientName', {
+      var tracker = new EventTracker('key', function(){}, 'url', 'clientName', calculateHash, {
         bufferTimeout: 0
       });
 
@@ -123,7 +131,7 @@ describe('EventTracker', function() {
     });
 
     it('does not append client context if configured as false', function() {
-      var tracker = new EventTracker('key', function(){}, 'url', 'clientName', {
+      var tracker = new EventTracker('key', function(){}, 'url', 'clientName', calculateHash, {
         bufferTimeout: 0,
         appendClientContext: false,
       });
@@ -151,7 +159,7 @@ describe('EventTracker', function() {
         uuid: uuid,
       }
 
-      var tracker = new EventTracker('key', function(){}, 'url', clientName, {
+      var tracker = new EventTracker('key', function(){}, 'url', clientName, calculateHash, {
         bufferTimeout: 0
       });
 
@@ -166,7 +174,7 @@ describe('EventTracker', function() {
       var url = 'url';
       var postStub = sinon.stub();
 
-      var tracker = new EventTracker('key', postStub, url, 'clientName', {
+      var tracker = new EventTracker('key', postStub, url, 'clientName', calculateHash, {
         bufferLength: 3
       });
 
@@ -185,7 +193,7 @@ describe('EventTracker', function() {
       var postStub = sinon.stub();
       var timeout = 20;
 
-      var tracker = new EventTracker('key', postStub, url, 'clientName', {
+      var tracker = new EventTracker('key', postStub, url, 'clientName', calculateHash, {
         bufferLength: 3,
         bufferTimeout: timeout
       });
@@ -204,7 +212,7 @@ describe('EventTracker', function() {
       var postStub = sinon.stub();
       var timeout = 20;
 
-      var tracker = new EventTracker('key', postStub, url, 'clientName', {
+      var tracker = new EventTracker('key', postStub, url, 'clientName', calculateHash, {
         bufferLength: 3,
         bufferTimeout: timeout
       });
@@ -221,6 +229,34 @@ describe('EventTracker', function() {
           done();
         }, timeout + 10);
       }, timeout + 10);
+    });
+  });
+
+  describe('posting', function() {
+    var tracker;
+    var postStub;
+    var args;
+
+    beforeEach(function() {
+      var url = 'url';
+
+      postStub = sinon.stub();
+
+      tracker = new EventTracker('key', postStub, url, 'clientName', calculateHash, {
+        bufferLength: 1,
+        bufferTimeout: 0
+      });
+
+      tracker.track('event', 'topic');
+      args = postStub.getCall(0).args[0];
+    });
+
+    it('posts proper parameters', function() {
+      var hash = calculateHash(tracker.key);
+
+      expect(args.url).to.equal(tracker.url);
+      expect(args.data).to.be.a('array');
+      expect(args.headers['X-Signature']).to.equal('key=' + tracker.key + ', mac=' + hash)
     });
   });
 });

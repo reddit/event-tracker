@@ -28,18 +28,18 @@
    * Create a new event tracker.
    *
    * key: the secret key you must have to send events, like 'ab42sdfsafsc'
-   * post: a function with the args (url, data). The body should send the data.
-   *   you'll probably do something like pass in `jQuery.post`, or a superagent
-   *   wrapper.
+   * post: a function with the object arg ({url, data, headers}).
+   *   You'll supply a function that wraps jQuery.ajax or superagent.
    * url: the url of the events endpoint, like 'https://stats.redditmedia.com/events'
    * clientName: the name of your client, like 'mweb'
+   * calculateHash: a function that takes (key, string) and returns an HMAC
    * config: an object containing optional configuration, such as:
    *   bufferTimeout: an integer, after which ms, the buffer of events is sent
    *     to the `post` function;
    *   bufferLength: an integer, after which the buffer contains this many
    *     items, the buffer of events is sent to the `post` function;
    */
-  function EventTracker(key, post, url, clientName, config) {
+  function EventTracker(key, post, url, clientName, calculateHash, config) {
     config = config || {};
 
     if (!key) {
@@ -61,10 +61,16 @@
     this.url = url;
 
     if (!clientName) {
-      throw('Missing clientName; pass in clientName as the third argument.');
+      throw('Missing clientName; pass in clientName as the fourth argument.');
     }
 
     this.clientName = clientName;
+
+    if (!calculateHash) {
+      throw('Missing calculateHash; pass in calculateHash as the fifth argument.');
+    }
+
+    this.calculateHash = calculateHash;
 
     if (typeof window !== 'undefined') {
       this.appendClientContext =
@@ -94,7 +100,15 @@
    */
   EventTracker.prototype.send = function send() {
     if (this.buffer.length) {
-      this.post(this.url, this.buffer);
+      var hash = this.calculateHash(this.key, JSON.stringify(this.buffer));
+
+      this.post({
+        url: this.url,
+        data: this.buffer,
+        headers: {
+          'X-Signature': 'key=' + this.key + ', mac=' + hash,
+        }
+      });
       this.buffer = [];
     }
 
