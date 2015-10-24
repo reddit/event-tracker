@@ -109,10 +109,9 @@
           'X-Signature': 'key=' + this.key + ', mac=' + hash,
         }
       });
+
       this.buffer = [];
     }
-
-    this._resetTimer();
   };
 
   EventTracker.prototype._validateClientName = function validateClientName(name) {
@@ -153,7 +152,7 @@
   EventTracker.prototype._buffer = function buffer(data) {
     this.buffer.push(data);
 
-    if (this.buffer.length >= this.bufferLength) {
+    if (this.buffer.length >= this.bufferLength || !this.bufferTimeout) {
       this.send();
     } else if (this.bufferTimeout && !this.timer) {
       this._resetTimer();
@@ -166,11 +165,13 @@
   EventTracker.prototype._resetTimer = function resetTimer() {
     if (this.timer) {
       clearTimeout(this.timer);
+      this.timer = undefined;
     }
 
     var tracker = this;
     this.timer = setTimeout(function() {
       tracker.send();
+      tracker.timer = undefined;
     }, this.bufferTimeout);
   }
 
@@ -192,4 +193,4 @@
   } else {
     global.EventTracker = EventTracker;
   }
-}(this);
+}(global || this);
