@@ -28,7 +28,7 @@
    * Create a new event tracker.
    *
    * key: the secret key you must have to send events, like 'ab42sdfsafsc'
-   * post: a function with the object arg ({url, data, headers}).
+   * post: a function with the object arg ({url, data, query, headers}).
    *   You'll supply a function that wraps jQuery.ajax or superagent.
    * url: the url of the events endpoint, like 'https://stats.redditmedia.com/events'
    * clientName: the name of your client, like 'mweb'
@@ -100,13 +100,21 @@
    */
   EventTracker.prototype.send = function send() {
     if (this.buffer.length) {
-      var hash = this.calculateHash(this.key, JSON.stringify(this.buffer));
+      var data = JSON.stringify(this.buffer);
+
+      var hash = this.calculateHash(this.key, data);
+
+      var headers = {
+        'Content-Type': 'text/plain',
+      };
 
       this.post({
         url: this.url,
-        data: this.buffer,
-        headers: {
-          'X-Signature': 'key=' + this.key + ', mac=' + hash,
+        data: data,
+        headers: headers,
+        query: {
+          key: this.key,
+          mac: hash,
         }
       });
 

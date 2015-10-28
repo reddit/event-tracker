@@ -255,8 +255,11 @@ describe('EventTracker', function() {
       var hash = calculateHash(tracker.key);
 
       expect(args.url).to.equal(tracker.url);
-      expect(args.data).to.be.a('array');
-      expect(args.headers['X-Signature']).to.equal('key=' + tracker.key + ', mac=' + hash)
+      expect(args.data).to.be.a('string');
+      expect(JSON.parse(args.data)).to.be.a('array');
+      expect(args.query.key).to.equal(tracker.key)
+      expect(args.query.mac).to.equal(hash)
+      expect(args.headers['Content-Type']).to.equal('text/plain');
     });
   });
 });
