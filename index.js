@@ -201,4 +201,4 @@
   } else {
     global.EventTracker = EventTracker;
   }
-}(global || this);
+}(typeof global !== 'undefined' ? global : this);
