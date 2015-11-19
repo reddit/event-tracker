@@ -11,7 +11,8 @@ global.document = {
   location: {
     host: 'test.com',
     pathname: '/test',
-    search: '?test=true'
+    search: '?test=true',
+    hash: '#snoo',
   }
 };
 
@@ -42,19 +43,19 @@ describe('EventTracker', function() {
 
       expect(function() {
         new EventTracker('key', function(){}, 'url')
-      }).to.throw(/missing clientName/i);
+      }).to.throw(/missing appName/i);
 
       expect(function() {
-        new EventTracker('key', function(){}, 'url', 'clientName')
+        new EventTracker('key', function(){}, 'url', 'appName')
       }).to.throw(/missing calculateHash/i);
 
       expect(function() {
-        new EventTracker('key', function(){}, 'url', 'clientName', { })
+        new EventTracker('key', function(){}, 'url', 'appName', { })
       }).to.not.throw();
     });
 
     it('uses defaults if not passed in', function() {
-      var tracker = new EventTracker('key', function(){}, 'url', 'clientName', { });
+      var tracker = new EventTracker('key', function(){}, 'url', 'appName', { });
       expect(tracker.bufferTimeout).to.equal(100);
       expect(tracker.bufferLength).to.equal(40);
     });
@@ -63,7 +64,7 @@ describe('EventTracker', function() {
       var timeout = 10;
       var length = 5;
 
-      var tracker = new EventTracker('key', function(){}, 'url', 'clientName', calculateHash, {
+      var tracker = new EventTracker('key', function(){}, 'url', 'appName', calculateHash, {
         bufferTimeout: timeout,
         bufferLength: length
       });
@@ -75,7 +76,7 @@ describe('EventTracker', function() {
 
   describe('tracking', function() {
     it('adds guid and timestamp to the data', function() {
-      var tracker = new EventTracker('key', function(){}, 'url', 'clientName', calculateHash, {
+      var tracker = new EventTracker('key', function(){}, 'url', 'appName', calculateHash, {
         bufferTimeout: 0
       });
 
@@ -88,16 +89,16 @@ describe('EventTracker', function() {
 
       expect(args.uuid).to.not.be.undefined;
       expect(args.event_ts).to.not.be.undefined;
-      expect(args.utc_offset).to.not.be.undefined;
+      expect(args.payload.utc_offset).to.not.be.undefined;
       stub.restore();
     });
 
     it('formats the data', function() {
       var topic = 'topic';
       var type = 'type';
-      var clientName = 'clientName';
+      var appName = 'appName';
 
-      var tracker = new EventTracker('key', function(){}, 'url', clientName, calculateHash, {
+      var tracker = new EventTracker('key', function(){}, 'url', appName, calculateHash, {
         bufferTimeout: 0
       });
 
@@ -107,13 +108,13 @@ describe('EventTracker', function() {
       var args = stub.getCall(0).args[0];
 
       expect(args.event_topic).to.equal(topic);
-      expect(args.event_type).to.equal(clientName + '.' + type);
+      expect(args.event_type).to.equal(type);
       expect(typeof args.payload).to.equal('object');
       stub.restore();
     });
 
     it('appends client context if configured as true', function() {
-      var tracker = new EventTracker('key', function(){}, 'url', 'clientName', calculateHash, {
+      var tracker = new EventTracker('key', function(){}, 'url', 'appName', calculateHash, {
         bufferTimeout: 0
       });
 
@@ -124,14 +125,15 @@ describe('EventTracker', function() {
 
       var args = stub.getCall(0).args[0];
 
-      expect(args.user_agent).to.equal(global.navigator.userAgent);
-      expect(args.domain).to.equal(global.document.location.host);
-      expect(args.path).to.equal(global.document.location.pathname + global.document.location.search);
+      expect(args.payload.user_agent).to.equal(global.navigator.userAgent);
+      expect(args.payload.domain).to.equal(global.document.location.host);
+      expect(args.payload.base_url)
+        .to.equal(global.document.location.pathname + global.document.location.search + global.document.location.hash);
       stub.restore();
     });
 
     it('does not append client context if configured as false', function() {
-      var tracker = new EventTracker('key', function(){}, 'url', 'clientName', calculateHash, {
+      var tracker = new EventTracker('key', function(){}, 'url', 'appName', calculateHash, {
         bufferTimeout: 0,
         appendClientContext: false,
       });
@@ -152,14 +154,14 @@ describe('EventTracker', function() {
     it('adds events to the buffer', function() {
       var topic = 'topic';
       var type = 'type';
-      var clientName = 'clientName';
+      var appName = 'appName';
       var uuid = 'uuid';
 
       var payload = {
         uuid: uuid,
       }
 
-      var tracker = new EventTracker('key', function(){}, 'url', clientName, calculateHash, {
+      var tracker = new EventTracker('key', function(){}, 'url', appName, calculateHash, {
         bufferTimeout: 0
       });
 
@@ -174,7 +176,7 @@ describe('EventTracker', function() {
       var url = 'url';
       var postStub = sinon.stub();
 
-      var tracker = new EventTracker('key', postStub, url, 'clientName', calculateHash, {
+      var tracker = new EventTracker('key', postStub, url, 'appName', calculateHash, {
         bufferLength: 3
       });
 
@@ -193,7 +195,7 @@ describe('EventTracker', function() {
       var postStub = sinon.stub();
       var timeout = 20;
 
-      var tracker = new EventTracker('key', postStub, url, 'clientName', calculateHash, {
+      var tracker = new EventTracker('key', postStub, url, 'appName', calculateHash, {
         bufferLength: 3,
         bufferTimeout: timeout
       });
@@ -212,7 +214,7 @@ describe('EventTracker', function() {
       var postStub = sinon.stub();
       var timeout = 20;
 
-      var tracker = new EventTracker('key', postStub, url, 'clientName', calculateHash, {
+      var tracker = new EventTracker('key', postStub, url, 'appName', calculateHash, {
         bufferLength: 3,
         bufferTimeout: timeout
       });
@@ -242,7 +244,7 @@ describe('EventTracker', function() {
 
       postStub = sinon.stub();
 
-      tracker = new EventTracker('key', postStub, url, 'clientName', calculateHash, {
+      tracker = new EventTracker('key', postStub, url, 'appName', calculateHash, {
         bufferLength: 1,
         bufferTimeout: 0
       });
