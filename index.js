@@ -139,10 +139,11 @@
       event_topic: topic,
       event_type: clientName + '.' + type,
       event_ts: now.getTime() / 1000,
-      utc_offset: now.getTimezoneOffset(),
       uuid: payload.uuid || uuid(),
       payload: payload,
     };
+
+    data.payload.utc_offset = now.getTimezoneOffset();
 
     if (this.appendClientContext) {
       var clientContext = this._buildClientContext();
