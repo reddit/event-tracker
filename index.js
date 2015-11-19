@@ -191,7 +191,7 @@
     return {
       user_agent: navigator.userAgent,
       domain: document.location.host,
-      path: document.location.pathname + document.location.search,
+      base_url: document.location.pathname + document.location.search + document.location.hash,
     }
   }
 
