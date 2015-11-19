@@ -31,7 +31,7 @@
    * post: a function with the object arg ({url, data, query, headers}).
    *   You'll supply a function that wraps jQuery.ajax or superagent.
    * url: the url of the events endpoint, like 'https://stats.redditmedia.com/events'
-   * clientName: the name of your client, like 'mweb'
+   * appName: the name of your client app, like 'Alien Blue'
    * calculateHash: a function that takes (key, string) and returns an HMAC
    * config: an object containing optional configuration, such as:
    *   bufferTimeout: an integer, after which ms, the buffer of events is sent
@@ -39,7 +39,7 @@
    *   bufferLength: an integer, after which the buffer contains this many
    *     items, the buffer of events is sent to the `post` function;
    */
-  function EventTracker(key, post, url, clientName, calculateHash, config) {
+  function EventTracker(key, post, url, appName, calculateHash, config) {
     config = config || {};
 
     if (!key) {
@@ -60,11 +60,11 @@
 
     this.url = url;
 
-    if (!clientName) {
-      throw('Missing clientName; pass in clientName as the fourth argument.');
+    if (!appName) {
+      throw('Missing appName; pass in appName as the fourth argument.');
     }
 
-    this.clientName = clientName;
+    this.appName = appName;
 
     if (!calculateHash) {
       throw('Missing calculateHash; pass in calculateHash as the fifth argument.');
@@ -132,17 +132,17 @@
    * Internal. Formats a payload to be sent to the event tracker.
    */
   EventTracker.prototype._buildData = function buildData (topic, type, payload) {
-    var clientName = this.clientName;
     var now = new Date();
 
     var data = {
       event_topic: topic,
-      event_type: clientName + '.' + type,
+      event_type: type,
       event_ts: now.getTime() / 1000,
       uuid: payload.uuid || uuid(),
       payload: payload,
     };
 
+    data.payload.app_name = this.appName;
     data.payload.utc_offset = now.getTimezoneOffset();
 
     if (this.appendClientContext) {
