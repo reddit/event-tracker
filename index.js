@@ -147,7 +147,7 @@
     if (this.appendClientContext) {
       var clientContext = this._buildClientContext();
       for (var c in clientContext) {
-        data[c] = clientContext[c];
+        data.payload[c] = clientContext[c];
       }
     }
 
