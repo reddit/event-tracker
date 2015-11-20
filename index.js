@@ -137,13 +137,13 @@
     var data = {
       event_topic: topic,
       event_type: type,
-      event_ts: now.getTime() / 1000,
+      event_ts: now.getTime(),
       uuid: payload.uuid || uuid(),
       payload: payload,
     };
 
     data.payload.app_name = this.appName;
-    data.payload.utc_offset = now.getTimezoneOffset();
+    data.payload.utc_offset = now.getTimezoneOffset() / -60;
 
     if (this.appendClientContext) {
       var clientContext = this._buildClientContext();
