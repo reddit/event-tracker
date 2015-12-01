@@ -28,18 +28,18 @@
    * Create a new event tracker.
    *
    * key: the secret key you must have to send events, like 'ab42sdfsafsc'
-   * post: a function with the object arg ({url, data, query, headers}).
+   * postData: a function with the object arg ({url, data, query, headers}).
    *   You'll supply a function that wraps jQuery.ajax or superagent.
    * url: the url of the events endpoint, like 'https://stats.redditmedia.com/events'
    * appName: the name of your client app, like 'Alien Blue'
    * calculateHash: a function that takes (key, string) and returns an HMAC
    * config: an object containing optional configuration, such as:
    *   bufferTimeout: an integer, after which ms, the buffer of events is sent
-   *     to the `post` function;
+   *     to the `postData` function;
    *   bufferLength: an integer, after which the buffer contains this many
-   *     items, the buffer of events is sent to the `post` function;
+   *     items, the buffer of events is sent to the `postData` function;
    */
-  function EventTracker(key, post, url, appName, calculateHash, config) {
+  function EventTracker(key, postData, url, appName, calculateHash, config) {
     config = config || {};
 
     if (!key) {
@@ -48,11 +48,11 @@
 
     this.key = key;
 
-    if (!post) {
+    if (!postData) {
       throw('Missing post function; pass in ajax post function as the second argument.');
     }
 
-    this.post = post;
+    this.postData = postData;
 
     if (!url) {
       throw('Missing url to post to; pass in url as the third argument.');
@@ -108,7 +108,7 @@
         'Content-Type': 'text/plain',
       };
 
-      this.post({
+      this.postData({
         url: this.url,
         data: data,
         headers: headers,
