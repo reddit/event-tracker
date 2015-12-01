@@ -30,7 +30,7 @@
    * clientKey: the secret key you must have to send events, like 'ab42sdfsafsc'
    * postData: a function with the object arg ({url, data, query, headers}).
    *   You'll supply a function that wraps jQuery.ajax or superagent.
-   * url: the url of the events endpoint, like 'https://stats.redditmedia.com/events'
+   * eventsUrl: the url of the events endpoint, like 'https://stats.redditmedia.com/events'
    * appName: the name of your client app, like 'Alien Blue'
    * calculateHash: a function that takes (key, string) and returns an HMAC
    * config: an object containing optional configuration, such as:
@@ -39,7 +39,7 @@
    *   bufferLength: an integer, after which the buffer contains this many
    *     items, the buffer of events is sent to the `postData` function;
    */
-  function EventTracker(clientKey, postData, url, appName, calculateHash, config) {
+  function EventTracker(clientKey, postData, eventsUrl, appName, calculateHash, config) {
     config = config || {};
 
     if (!clientKey) {
@@ -54,11 +54,11 @@
 
     this.postData = postData;
 
-    if (!url) {
+    if (!eventsUrl) {
       throw('Missing url to post to; pass in url as the third argument.');
     }
 
-    this.url = url;
+    this.eventsUrl = eventsUrl;
 
     if (!appName) {
       throw('Missing appName; pass in appName as the fourth argument.');
@@ -109,7 +109,7 @@
       };
 
       this.postData({
-        url: this.url,
+        url: this.eventsUrl,
         data: data,
         headers: headers,
         query: {
