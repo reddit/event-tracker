@@ -27,7 +27,7 @@
   /*
    * Create a new event tracker.
    *
-   * key: the secret key you must have to send events, like 'ab42sdfsafsc'
+   * clientKey: the secret key you must have to send events, like 'ab42sdfsafsc'
    * postData: a function with the object arg ({url, data, query, headers}).
    *   You'll supply a function that wraps jQuery.ajax or superagent.
    * url: the url of the events endpoint, like 'https://stats.redditmedia.com/events'
@@ -39,14 +39,14 @@
    *   bufferLength: an integer, after which the buffer contains this many
    *     items, the buffer of events is sent to the `postData` function;
    */
-  function EventTracker(key, postData, url, appName, calculateHash, config) {
+  function EventTracker(clientKey, postData, url, appName, calculateHash, config) {
     config = config || {};
 
-    if (!key) {
+    if (!clientKey) {
       throw('Missing key; pass in event client key as the first argument.');
     }
 
-    this.key = key;
+    this.clientKey = clientKey;
 
     if (!postData) {
       throw('Missing post function; pass in ajax post function as the second argument.');
@@ -102,7 +102,7 @@
     if (this.buffer.length) {
       var data = JSON.stringify(this.buffer);
 
-      var hash = this.calculateHash(this.key, data);
+      var hash = this.calculateHash(this.clientKey, data);
 
       var headers = {
         'Content-Type': 'text/plain',
@@ -113,7 +113,7 @@
         data: data,
         headers: headers,
         query: {
-          key: this.key,
+          key: this.clientKey,
           mac: hash,
         }
       });
