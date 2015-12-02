@@ -27,7 +27,8 @@
   /*
    * Create a new event tracker.
    *
-   * clientKey: the secret key you must have to send events, like 'ab42sdfsafsc'
+   * clientKey: the name of the secret key you must have to send events, like 'Test1'
+   * clientSecret: the secret key you must have to send events, like 'ab42sdfsafsc'
    * postData: a function with the object arg ({url, data, query, headers}).
    *   You'll supply a function that wraps jQuery.ajax or superagent.
    * eventsUrl: the url of the events endpoint, like 'https://stats.redditmedia.com/events'
@@ -39,7 +40,7 @@
    *   bufferLength: an integer, after which the buffer contains this many
    *     items, the buffer of events is sent to the `postData` function;
    */
-  function EventTracker(clientKey, postData, eventsUrl, appName, calculateHash, config) {
+  function EventTracker(clientKey, clientSecret, postData, eventsUrl, appName, calculateHash, config) {
     config = config || {};
 
     if (!clientKey) {
@@ -48,26 +49,32 @@
 
     this.clientKey = clientKey;
 
+    if (!clientSecret) {
+      throw('Missing secret; pass in event client secret as the second argument.');
+    }
+
+    this.clientSecret = clientSecret;
+
     if (!postData) {
-      throw('Missing post function; pass in ajax post function as the second argument.');
+      throw('Missing post function; pass in ajax post function as the third argument.');
     }
 
     this.postData = postData;
 
     if (!eventsUrl) {
-      throw('Missing url to post to; pass in url as the third argument.');
+      throw('Missing url to post to; pass in url as the fourth argument.');
     }
 
     this.eventsUrl = eventsUrl;
 
     if (!appName) {
-      throw('Missing appName; pass in appName as the fourth argument.');
+      throw('Missing appName; pass in appName as the fifth argument.');
     }
 
     this.appName = appName;
 
     if (!calculateHash) {
-      throw('Missing calculateHash; pass in calculateHash as the fifth argument.');
+      throw('Missing calculateHash; pass in calculateHash as the sixth argument.');
     }
 
     this.calculateHash = calculateHash;
@@ -102,7 +109,7 @@
     if (this.buffer.length) {
       var data = JSON.stringify(this.buffer);
 
-      var hash = this.calculateHash(this.clientKey, data);
+      var hash = this.calculateHash(this.clientSecret, data);
 
       var headers = {
         'Content-Type': 'text/plain',
