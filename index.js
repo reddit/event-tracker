@@ -8,7 +8,13 @@
   // Stub out `now` so we can use a more precise number in uuid generation, if
   // available.
   function now() {
-    return global.performance ? global.performance.now() : (new Date()).getTime();
+    if (global.performance && typeof global.performance.now === 'function') {
+      return global.performance.now();
+    } else if (typeof Date.now === 'function') {
+      return Date.now();
+    } else {
+      return (new Date()).getTime();
+    }
   }
 
   // Pulled from elsewhere
