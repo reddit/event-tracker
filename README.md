@@ -1,6 +1,8 @@
 Behold, the Event Tracker
 =========================
 
+[![Build Status](https://travis-ci.org/reddit/event-tracker.svg)](https://travis-ci.org/reddit/event-tracker)
+
 Usage:
 
 ```javascript
