@@ -35,7 +35,8 @@ tracker.track('mod_events', 'ban', {
 // send immediately rather than buffering. Without calling `send()`, the event
 // will be sent after buffer timeout (100ms) or buffer max length (40) is
 // reached. `send` flushes the current buffer of events and resets the timer.
-tracker.send();
+// send optionally takes a callback.
+tracker.send(callback);
 ```
 
 See [this wiki page](https://reddit.atlassian.net/wiki/pages/viewpage.action?pageId=19267594)

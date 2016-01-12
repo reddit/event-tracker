@@ -29,7 +29,7 @@
    *
    * clientKey: the name of the secret key you must have to send events, like 'Test1'
    * clientSecret: the secret key you must have to send events, like 'ab42sdfsafsc'
-   * postData: a function with the object arg ({url, data, query, headers}).
+   * postData: a function with the object arg ({url, data, query, headers, done}).
    *   You'll supply a function that wraps jQuery.ajax or superagent.
    * eventsUrl: the url of the events endpoint, like 'https://stats.redditmedia.com/events'
    * appName: the name of your client app, like 'Alien Blue'
@@ -104,8 +104,9 @@
   /*
    * Immediately flush the buffer. Called internally as well during buffer
    * timeout.
+   * done: optional callback to fire on complete.
    */
-  EventTracker.prototype.send = function send() {
+  EventTracker.prototype.send = function send(done) {
     if (this.buffer.length) {
       var data = JSON.stringify(this.buffer);
 
@@ -122,7 +123,8 @@
         query: {
           key: this.clientKey,
           mac: hash,
-        }
+        },
+        done: done || function() {},
       });
 
       this.buffer = [];
