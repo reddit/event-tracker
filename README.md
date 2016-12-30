@@ -14,6 +14,7 @@ var tracker = new EventTracker(
   jQuery.post, // function to use for ajax: `post(url, data)`
   'https://events-test.redditmedia.com/v1', // collector endpoint
   'desktopWeb', // client name, prepended to event type in payload
+  calculateHash, // a function that takes (key, string) and returns an HMAC
   {
     appendClientContext: true, // automatically adds user_agent, path, and domain to payload
     bufferTimeout: 100, // flush buffer of events after 100ms
