@@ -18,7 +18,7 @@
   }
 
   // Pulled from elsewhere
-  function uuid(){
+  function uuid() {
     var d = now();
 
     var id = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -181,7 +181,7 @@
     } else if (this.bufferTimeout && !this.timer) {
       this._resetTimer();
     }
-  }
+  };
 
   /*
    * Internal. Resets the buffer timeout.
@@ -197,7 +197,7 @@
       tracker.send();
       tracker.timer = undefined;
     }, this.bufferTimeout);
-  }
+  };
 
   /*
    * Internal. Adds certain browser-based properties to the payload if
@@ -208,8 +208,8 @@
       user_agent: navigator.userAgent,
       domain: document.location.host,
       base_url: document.location.pathname + document.location.search + document.location.hash,
-    }
-  }
+    };
+  };
 
   // Handle npm modules and window globals
   if (typeof module !== 'undefined') {
