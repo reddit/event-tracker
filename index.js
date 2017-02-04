@@ -1,6 +1,24 @@
 !function(global) {
   'use strict';
 
+  function parseUrl(url) {
+    var parser = document.createElement('a');
+
+    parser.href = url;
+
+    return {
+      href: parser.href,
+      protocol: parser.protocol,
+      host: parser.host,
+      hostname: parser.hostname,
+      port: parser.port,
+      pathname: parser.pathname,
+      search: parser.search,
+      hash: parser.hash,
+      origin: parser.origin,
+    };
+  }
+
   // Stub out `now` so we can use a more precise number in uuid generation, if
   // available.
   function now() {
@@ -198,6 +216,9 @@
       user_agent: navigator.userAgent,
       domain: document.location.host,
       base_url: document.location.pathname + document.location.search + document.location.hash,
+      referrer_domain: parseUrl(document.referrer).host,
+      referrer_url: document.referrer,
+      language: document.getElementsByTagName('html')[0].getAttribute('lang'),
     };
   };
 
