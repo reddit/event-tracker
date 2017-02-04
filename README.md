@@ -6,19 +6,20 @@ Behold, the Event Tracker
 Usage:
 
 ```javascript
-// key, ajax post, and url are required; config object is optional.
-// default config object options are shown below.
+// key, secret, clientName, and endpoint can also be configured via the environment
+// variables TRACKER_KEY, TRACKER_SECRET, TRACKER_CLIENT_NAME and TRACKER_ENDPOINT.
 
-var tracker = new EventTracker(
-  'abcdef==', // tracker key
-  jQuery.post, // function to use for ajax: `post(url, data)`
-  'https://events-test.redditmedia.com/v1', // collector endpoint
-  'desktopWeb', // client name, prepended to event type in payload
-  {
-    appendClientContext: true, // automatically adds user_agent, path, and domain to payload
-    bufferTimeout: 100, // flush buffer of events after 100ms
-    bufferLength: 40, // flush buffer events after buffer length is 40
-  }
+var tracker = new EventTracker({
+  key: 'MyApp01',
+  secret: 'abcdef==',
+  postData: jQuery.post, // function to use for ajax: `post(url, data)`
+  calculateHash: createHmac, // A function that takes (key, string) and returns an HMAC
+  endpoint: 'https://events-test.redditmedia.com/v1', // collector endpoint
+  clientName: 'desktopWeb', // client name, prepended to event type in payload
+  appendClientContext: true, // automatically adds user_agent, path, and domain to payload
+  bufferTimeout: 100, // flush buffer of events after 100ms
+  bufferLength: 40, // flush buffer events after buffer length is 40
+  debug: true, // log events instead of sending them.
 );
 
 tracker.track('mod_events', 'ban', {

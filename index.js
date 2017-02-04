@@ -1,6 +1,12 @@
 !function(global) {
   'use strict';
 
+  function logEvent(data) {
+    var eventTopics = data.map(function(e) { return e.event_topic; }).join(', ');
+
+    console.info('Tracking ' + eventTopics + ' with data:', data);
+  }
+
   function parseUrl(url) {
     var parser = document.createElement('a');
 
@@ -44,68 +50,83 @@
     return id;
   }
 
-  /*
+  /**
    * Create a new event tracker.
    *
-   * clientKey: the name of the secret key you must have to send events, like 'Test1'
-   * clientSecret: the secret key you must have to send events, like 'ab42sdfsafsc'
-   * postData: a function with the object arg ({url, data, query, headers, done}).
-   *   You'll supply a function that wraps jQuery.ajax or superagent.
-   * eventsUrl: the url of the events endpoint, like 'https://stats.redditmedia.com/events'
-   * appName: the name of your client app, like 'Alien Blue'
-   * calculateHash: a function that takes (key, string) and returns an HMAC
-   * config: an object containing optional configuration, such as:
-   *   bufferTimeout: an integer, after which ms, the buffer of events is sent
-   *     to the `postData` function;
-   *   bufferLength: an integer, after which the buffer contains this many
-   *     items, the buffer of events is sent to the `postData` function;
-   */
-  function EventTracker(clientKey, clientSecret, postData, eventsUrl, appName, calculateHash, config) {
-    config = config || {};
+   * @param {Object} options - The tracker configuration options.
+   * @param {string} options.key - The name of the secret key you must have to send events, like 'Test1'
+   * @param {string} options.secret - The secret key you must have to send events, like 'ab42sdfsafsc'
+   * @param {string} options.endpoint - The url of the events endpoint, like 'https://stats.redditmedia.com/events'
+   * @param {string} options.clientName - The name of your client app, like 'Alien Blue'
+   * @param {function} options.postData - A function which makes a POST request using the
+   *    arguments ({url, data, headers, done}). Simply wrap `window.fetch`, `jQuery.ajax`, etc.
+   * @param {function} options.calculateHash - A function that takes (key, string) and returns an HMAC
+   * @param {number} options.bufferTimeout - An integer, after which ms, the buffer of events is sent
+   *    to the `postData` function; Defaults to 100.
+   * @param {number} options.bufferLength - An integer, after which the buffer contains this many
+   *    items, the buffer of events is sent to the `postData` function; Defaults to 40.
+   * @param {function} options.appendClientContext - Whether or not the tracker adds the follow client data
+   *    to each event: { user_agent, domain, base_url, referrer_domain, referrer_url, language } 
+   * @param {boolean} options.debug - Whether or not the tracker should actually send events or just log them.
+   **/
+  function EventTracker(options) {
+    options = options || {};
 
-    if (!clientKey) {
-      throw('Missing key; pass in event client key as the first argument.');
+    var key = options.key || process.env.EVENT_TRACKER_KEY;
+    var secret = options.secret || process.env.EVENT_TRACKER_SECRET;
+    var endpoint = options.endpoint || process.env.EVENT_TRACKER_ENDPOINT;
+    var clientName = options.clientName || process.env.EVENT_TRACKER_CLIENT_NAME;
+
+    this.debug = typeof options.debug === 'undefined' ?
+      process.env.NODE_ENV !== 'production' : options.debug;
+
+    if (!key) {
+      console.warn('Missing required option `key`; forcing debug mode on.');
+      this.debug = true;
+    } else {
+      this.key = key;
     }
 
-    this.clientKey = clientKey;
-
-    if (!clientSecret) {
-      throw('Missing secret; pass in event client secret as the second argument.');
+    if (!secret) {
+      console.warn('Missing required option `secret`; forcing debug mode on.');
+      this.debug = true;
+    } else {
+      this.secret = secret;
     }
 
-    this.clientSecret = clientSecret;
-
-    if (!postData) {
-      throw('Missing post function; pass in ajax post function as the third argument.');
+    if (!endpoint) {
+      console.warn('Missing required option `endpoint`; forcing debug mode on.');
+      this.debug = true;
+    } else {
+      this.endpoint = endpoint;
     }
 
-    this.postData = postData;
-
-    if (!eventsUrl) {
-      throw('Missing url to post to; pass in url as the fourth argument.');
+    if (!clientName) {
+      console.warn('Missing required option `clientName`; forcing debug mode on.');
+      this.debug = true;
+    } else {
+      this.clientName = clientName;
     }
 
-    this.eventsUrl = eventsUrl;
-
-    if (!appName) {
-      throw('Missing appName; pass in appName as the fifth argument.');
+    if (!options.postData) {
+      throw('Missing required option `postData`.');
     }
 
-    this.appName = appName;
+    this.postData = options.postData;
 
-    if (!calculateHash) {
-      throw('Missing calculateHash; pass in calculateHash as the sixth argument.');
+    if (!options.calculateHash) {
+      throw('Missing required option `calculateHash`.');
     }
 
-    this.calculateHash = calculateHash;
+    this.calculateHash = options.calculateHash;
 
     if (typeof window !== 'undefined') {
       this.appendClientContext =
-        typeof config.appendClientContext === 'undefined' ? true : config.appendClientContext;
+        typeof options.appendClientContext === 'undefined' ? true : options.appendClientContext;
     }
 
-    this.bufferTimeout = config.bufferTimeout || 100;
-    this.bufferLength = config.bufferLength || 40;
+    this.bufferTimeout = options.bufferTimeout || 100;
+    this.bufferLength = options.bufferLength || 40;
     this.buffer = [];
   }
 
@@ -128,21 +149,21 @@
    */
   EventTracker.prototype.send = function send(done) {
     if (this.buffer.length) {
+      if (this.debug) {
+        return logEvent(this.buffer);
+      }
+
+      var url = this.endpoint +
+        (this.endpoint.indexOf('?') === -1 ? '?' : '&') +
+        'key=' + encodeURIComponent(this.key) +
+        '&mac=' + encodeURIComponent(this.calculateHash(this.secret, data));
       var data = JSON.stringify(this.buffer);
 
-      var hash = this.calculateHash(this.clientSecret, data);
-
-      var headers = {
-        'Content-Type': 'text/plain',
-      };
-
       this.postData({
-        url: this.eventsUrl,
+        url: url,
         data: data,
-        headers: headers,
-        query: {
-          key: this.clientKey,
-          mac: hash,
+        headers: {
+          'Content-Type': 'text/plain',
         },
         done: done || function() {},
       });
@@ -165,7 +186,7 @@
       payload: payload,
     };
 
-    data.payload.app_name = this.appName;
+    data.payload.app_name = this.clientName;
     data.payload.utc_offset = now.getTimezoneOffset() / -60;
 
     if (this.appendClientContext) {
