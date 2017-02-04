@@ -1,10 +1,6 @@
 !function(global) {
   'use strict';
 
-  // Aggressively match any non-numeric or alphebetic character. Also catches
-  // utf8, which is probably for the best.
-  var CLIENT_NAME_INVALID_CHARACTERS = /[^A-Za-z0-9]/;
-
   // Stub out `now` so we can use a more precise number in uuid generation, if
   // available.
   function now() {
@@ -136,12 +132,6 @@
       this.buffer = [];
     }
   };
-
-  EventTracker.prototype._validateClientName = function validateClientName(name) {
-    if (CLIENT_NAME_INVALID_CHARACTERS.test(name)) {
-      throw('Invalid client name, please use only letters or numbers', name);
-    }
-  }
 
   /*
    * Internal. Formats a payload to be sent to the event tracker.
