@@ -41,6 +41,10 @@ function calculateHash (key, string) {
 }
 
 describe('EventTracker', function() {
+  beforeEach(function() {
+    // make sure Date.now always returns the same value within tests.
+    sinon.stub(Date.prototype, 'getTime').returns(4);
+  });
   afterEach(function() {
     // reset env
     process.env.NODE_ENV = 'test';
@@ -48,6 +52,8 @@ describe('EventTracker', function() {
     delete process.env.EVENT_TRACKER_SECRET;
     delete process.env.EVENT_TRACKER_ENDPOINT;
     delete process.env.EVENT_TRACKER_CLIENT_NAME;
+
+    Date.prototype.getTime.restore();
   });
 
   describe('constructor', function() {
