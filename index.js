@@ -72,10 +72,10 @@
   function EventTracker(options) {
     options = options || {};
 
-    var key = options.key || process.env.EVENT_TRACKER_KEY;
-    var secret = options.secret || process.env.EVENT_TRACKER_SECRET;
-    var endpoint = options.endpoint || process.env.EVENT_TRACKER_ENDPOINT;
-    var clientName = options.clientName || process.env.EVENT_TRACKER_CLIENT_NAME;
+    var key = options.key || process.env.TRACKER_KEY;
+    var secret = options.secret || process.env.TRACKER_SECRET;
+    var endpoint = options.endpoint || process.env.TRACKER_ENDPOINT;
+    var clientName = options.clientName || process.env.TRACKER_CLIENT_NAME;
 
     this.debug = typeof options.debug === 'undefined' ?
       process.env.NODE_ENV !== 'production' : options.debug;

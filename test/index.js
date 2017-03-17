@@ -48,10 +48,10 @@ describe('EventTracker', function() {
   afterEach(function() {
     // reset env
     process.env.NODE_ENV = 'test';
-    delete process.env.EVENT_TRACKER_KEY;
-    delete process.env.EVENT_TRACKER_SECRET;
-    delete process.env.EVENT_TRACKER_ENDPOINT;
-    delete process.env.EVENT_TRACKER_CLIENT_NAME;
+    delete process.env.TRACKER_KEY;
+    delete process.env.TRACKER_SECRET;
+    delete process.env.TRACKER_ENDPOINT;
+    delete process.env.TRACKER_CLIENT_NAME;
 
     Date.prototype.getTime.restore();
   });
@@ -92,10 +92,10 @@ describe('EventTracker', function() {
     it('it uses config from `env` if defined', function() {
       console.warn = sinon.spy();
 
-      process.env.EVENT_TRACKER_KEY = 'foo';
-      process.env.EVENT_TRACKER_SECRET = 'bar';
-      process.env.EVENT_TRACKER_ENDPOINT = 'http://events-example.reddit.com/v1';
-      process.env.EVENT_TRACKER_CLIENT_NAME = 'eventTrackerTests';
+      process.env.TRACKER_KEY = 'foo';
+      process.env.TRACKER_SECRET = 'bar';
+      process.env.TRACKER_ENDPOINT = 'http://events-example.reddit.com/v1';
+      process.env.TRACKER_CLIENT_NAME = 'eventTrackerTests';
 
       var tracker = new EventTracker({
         postData: noop,
