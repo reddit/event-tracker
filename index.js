@@ -153,11 +153,11 @@
         return logEvent(this.buffer);
       }
 
+      var data = JSON.stringify(this.buffer);
       var url = this.endpoint +
         (this.endpoint.indexOf('?') === -1 ? '?' : '&') +
         'key=' + encodeURIComponent(this.key) +
         '&mac=' + encodeURIComponent(this.calculateHash(this.secret, data));
-      var data = JSON.stringify(this.buffer);
 
       this.postData({
         url: url,
