@@ -1,6 +1,6 @@
 {
   "name": "reddit-event-tracker",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "description": "send events to the /events endpoint easily",
   "main": "index.js",
   "scripts": {
