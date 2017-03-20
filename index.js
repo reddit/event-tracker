@@ -50,6 +50,14 @@
     return id;
   }
 
+  function b64decode(base64) {
+    return (
+      global.atob ?
+        global.atob(base64) :
+        new Buffer(base64, 'base64').toString('utf8')
+    );
+  }
+
   /**
    * Create a new event tracker.
    *
@@ -73,7 +81,7 @@
     options = options || {};
 
     var key = options.key || process.env.TRACKER_KEY;
-    var secret = options.secret || process.env.TRACKER_SECRET;
+    var secret = options.secret || (process.env.TRACKER_SECRET && b64decode(process.env.TRACKER_SECRET));
     var endpoint = options.endpoint || process.env.TRACKER_ENDPOINT;
     var clientName = options.clientName || process.env.TRACKER_CLIENT_NAME;
 
