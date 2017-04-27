@@ -40,10 +40,6 @@ tracker.track('mod_events', 'ban', {
 tracker.send(callback);
 ```
 
-See [this wiki page](https://reddit.atlassian.net/wiki/pages/viewpage.action?pageId=19267594)
-for some examples of payload data. `user_agent` and `domain` are automatically
-added to payload data if `appendClientContext` is true.
-
 ## Testing
 
 * Install node
