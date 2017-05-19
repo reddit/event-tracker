@@ -156,6 +156,8 @@
    * done: optional callback to fire on complete.
    */
   EventTracker.prototype.send = function send(done) {
+    done = done || function() {};
+
     if (this.buffer.length) {
       if (this.debug) {
         return logEvent(this.buffer);
@@ -173,11 +175,13 @@
         headers: {
           'Content-Type': 'text/plain',
         },
-        done: done || function() {},
+        done: done,
       });
 
       this.buffer = [];
     }
+
+    done();
   };
 
   /*
