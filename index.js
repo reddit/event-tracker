@@ -136,6 +136,10 @@
     this.bufferTimeout = options.bufferTimeout || 100;
     this.bufferLength = options.bufferLength || 40;
     this.buffer = [];
+
+    if (process.env.NODE_ENV === 'production') {
+      this.debug = false;
+    }
   }
 
   /*
