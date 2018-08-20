@@ -205,7 +205,7 @@
     data.payload.app_name = this.clientName;
     data.payload.utc_offset = now.getTimezoneOffset() / -60;
 
-    if (this.appendClientContext) {
+    if (this.appendClientContext && process.env.ENV !== 'server') {
       var clientContext = this._buildClientContext();
       for (var c in clientContext) {
         data.payload[c] = clientContext[c];
